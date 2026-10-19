@@ -217,7 +217,22 @@ $jsVer = file_exists(__DIR__ . '/assets/main.js') ? filemtime(__DIR__ . '/assets
     }
   </style>
 </head>
-<body>
+<body class="is-loading">
+
+<!-- ==========================================================================
+     MINIMALIST PROFESSIONAL PRELOADER
+     ========================================================================== -->
+<div class="sys-preloader" id="sys-preloader" aria-label="Memuat halaman">
+  <div class="preloader-minimal">
+    <div class="preloader-header">
+      <span class="preloader-logo"><?= e($name) ?><span class="dot">.</span></span>
+      <span class="preloader-percent" id="preloader-percent">0%</span>
+    </div>
+    <div class="preloader-line-track">
+      <div class="preloader-line-fill" id="preloader-bar"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Custom Interactive Precision Cursor -->
 <div class="cursor-dot" id="cursor-dot"></div>
@@ -551,42 +566,13 @@ $jsVer = file_exists(__DIR__ . '/assets/main.js') ? filemtime(__DIR__ . '/assets
           </div>
         </aside>
 
-        <!-- Right Column: Penjelasan Tentang Diri Saya & Riwayat Perjalanan -->
+        <!-- Right Column: Riwayat Pendidikan, Pengalaman & Perjalanan -->
         <div class="about-content-col">
-          <!-- Sub-panel A: Penjelasan Tentang Diri Saya -->
-          <article class="about-bio-card spotlight-card">
-            <span class="tech-corner tl"></span><span class="tech-corner br"></span>
-            <div class="about-subpanel-head">
-              <span class="subpanel-kicker">01A // PENJELASAN_TENTANG_DIRI_SAYA</span>
-              <span class="subpanel-badge">BIO_NARRATIVE.MD</span>
-            </div>
-
-            <div class="about-bio-body">
-              <?= nl2br(e($aboutText)) ?>
-            </div>
-
-            <div class="about-metrics-row">
-              <div class="about-metric-box">
-                <span class="metric-num"><?= count($projects) ?>+</span>
-                <span class="metric-caption">Project &amp; Sistem</span>
-              </div>
-              <div class="about-metric-box">
-                <span class="metric-num"><?= count($skills) ?>+</span>
-                <span class="metric-caption">Teknologi &amp; Stack</span>
-              </div>
-              <div class="about-metric-box">
-                <span class="metric-num"><?= count($historyItems) ?></span>
-                <span class="metric-caption">Riwayat &amp; Fase</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- Sub-panel B: Riwayat Pendidikan, Pengalaman & Perjalanan -->
           <div class="about-history-card spotlight-card">
             <span class="tech-corner tr"></span><span class="tech-corner bl"></span>
             <div class="about-subpanel-head history-head-wrap">
               <div>
-                <span class="subpanel-kicker">01B // RIWAYAT_PENDIDIKAN_&amp;_PENGALAMAN</span>
+                <span class="subpanel-kicker">01 // RIWAYAT_PENDIDIKAN_&amp;_PENGALAMAN</span>
                 <h3 class="about-history-title">Jejak Akademik, Pengalaman &amp; Perjalanan</h3>
               </div>
 

@@ -8,6 +8,8 @@ let audioCtx = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  initPreloader();
+  initScrollReveal();
   initSfxSystem();
   initCustomCursor();
   initCyberCanvas();
@@ -1265,3 +1267,132 @@ function initFormInteractions() {
     sync();
   }
 }
+
+/* ----------------------------------------------------
+   14. 3D SPATIAL OS BOOT PRELOADER & HERO ENTRANCE
+   ---------------------------------------------------- */
+function initPreloader() {
+  const preloader = document.getElementById('sys-preloader');
+  const percentEl = document.getElementById('preloader-percent');
+  const barEl = document.getElementById('preloader-bar');
+  const statusEl = document.getElementById('preloader-status');
+
+  // Tag hero elements for staggered entrance after preloader
+  const heroTargets = document.querySelectorAll(
+    '#home .hero-telemetry, #home h1, #home .hero-subtitle, #home .hero-description, #home .hero-actions, #home .social-pills, #home #hero-terminal'
+  );
+  heroTargets.forEach((el, idx) => {
+    el.classList.add('hero-entrance-item');
+    el.style.setProperty('--hero-delay', `${idx * 85}ms`);
+  });
+
+  if (!preloader) {
+    document.body.classList.remove('is-loading');
+    document.body.classList.add('is-loaded');
+    return;
+  }
+
+  let finished = false;
+  function completeBoot() {
+    if (finished) return;
+    finished = true;
+    if (percentEl) percentEl.textContent = '100%';
+    if (barEl) barEl.style.width = '100%';
+    if (statusEl) statusEl.textContent = 'SYSTEM_READY // LAUNCHING_STAGE';
+
+    setTimeout(() => {
+      preloader.classList.add('loaded');
+      document.body.classList.remove('is-loading');
+      document.body.classList.add('is-loaded');
+    }, 180);
+  }
+
+  const duration = 950;
+  const start = performance.now();
+
+  function step(now) {
+    if (finished) return;
+    const elapsed = now - start;
+    const progress = Math.min(1, elapsed / duration);
+    // Ease out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const pct = Math.floor(eased * 100);
+
+    if (percentEl) percentEl.textContent = `${pct}%`;
+    if (barEl) barEl.style.width = `${pct}%`;
+    if (statusEl) {
+      if (pct < 32) statusEl.textContent = 'BOOTING_SPATIAL_3D_ENGINE...';
+      else if (pct < 66) statusEl.textContent = 'MOUNTING_DEVELOPER_MODULES...';
+      else if (pct < 92) statusEl.textContent = 'ARMING_7_LAYER_SECURITY...';
+      else statusEl.textContent = 'SYSTEM_READY // LAUNCHING_STAGE';
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      completeBoot();
+    }
+  }
+
+  requestAnimationFrame(step);
+  // Hard failsafe so page never stays locked
+  setTimeout(completeBoot, 1600);
+}
+
+/* ----------------------------------------------------
+   15. 3D SCROLL-REVEAL ANIMATION ENGINE
+   ---------------------------------------------------- */
+function initScrollReveal() {
+  const revealConfig = [
+    { selector: '.section-header', variant: 'reveal-up', stagger: false },
+    { selector: '.about-photo-card', variant: 'reveal-left', stagger: false },
+    { selector: '.about-history-card', variant: 'reveal-right', stagger: false },
+    { selector: '.history-item', variant: 'reveal-up', stagger: true, stepMs: 90 },
+    { selector: '.projects-filter-bar', variant: 'reveal-up', stagger: false },
+    { selector: '.project-card', variant: 'reveal-scale', stagger: true, stepMs: 85 },
+    { selector: '.keycap-card', variant: 'reveal-scale', stagger: true, stepMs: 55 },
+    { selector: '.radar-card', variant: 'reveal-right', stagger: false },
+    { selector: '.blog-card', variant: 'reveal-up', stagger: true, stepMs: 95 },
+    { selector: '.contact-info-card', variant: 'reveal-left', stagger: false },
+    { selector: '.contact-form-card', variant: 'reveal-right', stagger: false }
+  ];
+
+  const allTargets = [];
+
+  revealConfig.forEach(cfg => {
+    const nodes = document.querySelectorAll(cfg.selector);
+    nodes.forEach((el, idx) => {
+      el.classList.add('scroll-reveal', cfg.variant);
+      if (cfg.stagger) {
+        const delay = Math.min(idx % 6, 5) * (cfg.stepMs || 80);
+        el.style.setProperty('--reveal-delay', `${delay}ms`);
+      }
+      allTargets.push(el);
+    });
+  });
+
+  if (!('IntersectionObserver' in window)) {
+    allTargets.forEach(el => el.classList.add('is-visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        } else if (entry.boundingClientRect.top > 80) {
+          // Re-animate smoothly when scrolling back down from above
+          entry.target.classList.remove('is-visible');
+        }
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '0px 0px -40px 0px'
+    }
+  );
+
+  allTargets.forEach(el => observer.observe(el));
+}
+
