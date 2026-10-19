@@ -21,10 +21,10 @@
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-card: rgba(255, 255, 255, 0.12);
 
-  --accent: #5b6cff;
+  --accent: #04aec1;
   --accent-rgb: 91, 108, 255;
-  --accent-gradient: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
-  --accent-glow: rgba(91, 108, 255, 0.25);
+  --accent-gradient: linear-gradient(135deg, var(--accent) 0%, #0ab4d6 100%);
+  --accent-glow: rgba(77, 255, 246, 0.25);
 
   --success: #10b981;
   --danger: #ef4444;
