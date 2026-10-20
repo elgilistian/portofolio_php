@@ -467,46 +467,33 @@ function initBlueprintPipeline() {
 }
 
 /* ----------------------------------------------------
-   5. 3D TACTILE MECHANICAL KEYCAPS & RADIAL GAUGE
+/* ----------------------------------------------------
+   5. TOOLS & TECHNOLOGIES INTERACTIVE CATEGORY SWITCHER
    ---------------------------------------------------- */
 function initKeycapsMatrix() {
-  const keycaps = document.querySelectorAll('.keycap-card');
-  const gaugeCircle = document.getElementById('gauge-circle');
-  const gaugePct = document.getElementById('gauge-pct');
-  const gaugeTitle = document.getElementById('gauge-title');
-  const gaugeCat = document.getElementById('gauge-cat');
+  const catBtns = document.querySelectorAll('.skill-cat-item');
+  const panels = document.querySelectorAll('.skill-focus-panel');
+  if (!catBtns.length || !panels.length) return;
 
-  if (!keycaps.length) return;
-  const circumference = 2 * Math.PI * 60; // r=60 => ~377
+  function activateCategory(btn) {
+    const targetId = btn.getAttribute('data-skill-cat-target');
+    if (!targetId) return;
 
-  function updateGauge(card) {
-    keycaps.forEach(k => k.classList.remove('active-cap'));
-    card.classList.add('active-cap');
+    catBtns.forEach(b => {
+      const isMatch = b === btn;
+      b.classList.toggle('active', isMatch);
+      b.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+    });
 
-    const name = card.getAttribute('data-skill-name') || 'Skill';
-    const cat = card.getAttribute('data-skill-cat') || 'Stack';
-    const level = parseInt(card.getAttribute('data-skill-level') || '85', 10);
-
-    if (gaugeTitle) gaugeTitle.textContent = name;
-    if (gaugeCat) gaugeCat.textContent = `LAYER // ${cat.toUpperCase()}`;
-    if (gaugePct) gaugePct.textContent = `${level}%`;
-    if (gaugeCircle) {
-      const offset = circumference - (level / 100) * circumference;
-      gaugeCircle.style.strokeDashoffset = `${offset}`;
-    }
+    panels.forEach(p => {
+      p.classList.toggle('active', p.id === targetId);
+    });
   }
 
-  // Initialize first keycap
-  updateGauge(keycaps[0]);
-
-  keycaps.forEach(card => {
-    card.addEventListener('click', () => {
-      playSynthSfx('keycap');
-      updateGauge(card);
-    });
-    card.addEventListener('mouseenter', () => {
-      playSynthSfx('tick');
-      updateGauge(card);
+  catBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      playSynthSfx('click');
+      activateCategory(btn);
     });
   });
 }
@@ -1269,21 +1256,19 @@ function initFormInteractions() {
 }
 
 /* ----------------------------------------------------
-   14. 3D SPATIAL OS BOOT PRELOADER & HERO ENTRANCE
+   14. MINIMALIST PROFESSIONAL PRELOADER & HERO ENTRANCE
    ---------------------------------------------------- */
 function initPreloader() {
   const preloader = document.getElementById('sys-preloader');
   const percentEl = document.getElementById('preloader-percent');
   const barEl = document.getElementById('preloader-bar');
-  const statusEl = document.getElementById('preloader-status');
 
-  // Tag hero elements for staggered entrance after preloader
   const heroTargets = document.querySelectorAll(
     '#home .hero-telemetry, #home h1, #home .hero-subtitle, #home .hero-description, #home .hero-actions, #home .social-pills, #home #hero-terminal'
   );
   heroTargets.forEach((el, idx) => {
     el.classList.add('hero-entrance-item');
-    el.style.setProperty('--hero-delay', `${idx * 85}ms`);
+    el.style.setProperty('--hero-delay', `${idx * 70}ms`);
   });
 
   if (!preloader) {
@@ -1293,50 +1278,40 @@ function initPreloader() {
   }
 
   let finished = false;
-  function completeBoot() {
+  function completeLoad() {
     if (finished) return;
     finished = true;
     if (percentEl) percentEl.textContent = '100%';
     if (barEl) barEl.style.width = '100%';
-    if (statusEl) statusEl.textContent = 'SYSTEM_READY // LAUNCHING_STAGE';
 
     setTimeout(() => {
       preloader.classList.add('loaded');
       document.body.classList.remove('is-loading');
       document.body.classList.add('is-loaded');
-    }, 180);
+    }, 100);
   }
 
-  const duration = 950;
+  const duration = 600;
   const start = performance.now();
 
   function step(now) {
     if (finished) return;
-    const elapsed = now - start;
-    const progress = Math.min(1, elapsed / duration);
-    // Ease out cubic
+    const progress = Math.min(1, (now - start) / duration);
     const eased = 1 - Math.pow(1 - progress, 3);
     const pct = Math.floor(eased * 100);
 
     if (percentEl) percentEl.textContent = `${pct}%`;
     if (barEl) barEl.style.width = `${pct}%`;
-    if (statusEl) {
-      if (pct < 32) statusEl.textContent = 'BOOTING_SPATIAL_3D_ENGINE...';
-      else if (pct < 66) statusEl.textContent = 'MOUNTING_DEVELOPER_MODULES...';
-      else if (pct < 92) statusEl.textContent = 'ARMING_7_LAYER_SECURITY...';
-      else statusEl.textContent = 'SYSTEM_READY // LAUNCHING_STAGE';
-    }
 
     if (progress < 1) {
       requestAnimationFrame(step);
     } else {
-      completeBoot();
+      completeLoad();
     }
   }
 
   requestAnimationFrame(step);
-  // Hard failsafe so page never stays locked
-  setTimeout(completeBoot, 1600);
+  setTimeout(completeLoad, 1000);
 }
 
 /* ----------------------------------------------------
@@ -1350,9 +1325,9 @@ function initScrollReveal() {
     { selector: '.history-item', variant: 'reveal-up', stagger: true, stepMs: 90 },
     { selector: '.projects-filter-bar', variant: 'reveal-up', stagger: false },
     { selector: '.project-card', variant: 'reveal-scale', stagger: true, stepMs: 85 },
-    { selector: '.keycap-card', variant: 'reveal-scale', stagger: true, stepMs: 55 },
-    { selector: '.radar-card', variant: 'reveal-right', stagger: false },
-    { selector: '.blog-card', variant: 'reveal-up', stagger: true, stepMs: 95 },
+    { selector: '.skills-cat-sidebar', variant: 'reveal-left', stagger: false },
+    { selector: '.skills-focus-stage', variant: 'reveal-right', stagger: false },
+    { selector: '.post-card', variant: 'reveal-up', stagger: true, stepMs: 95 },
     { selector: '.contact-info-card', variant: 'reveal-left', stagger: false },
     { selector: '.contact-form-card', variant: 'reveal-right', stagger: false }
   ];

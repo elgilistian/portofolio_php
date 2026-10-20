@@ -14,6 +14,8 @@ if (empty($_SESSION['csrf_token'])) {
 }
 
 // Fetch database records
+$skillGroups = ensure_skills_v2($pdo);
+$skillsSubtitle = setting($pdo, 'skills_subtitle', 'Teknologi dan tools yang saya gunakan untuk mengembangkan website, programming, UI design, dan berbagai kebutuhan kreatif.');
 $projects = $pdo->query('SELECT * FROM projects ORDER BY featured DESC, created_at DESC')->fetchAll();
 $skills = $pdo->query('SELECT * FROM skills ORDER BY sort_order ASC, name ASC')->fetchAll();
 $posts = $pdo->query("SELECT * FROM posts WHERE status='published' ORDER BY published_at DESC, created_at DESC LIMIT 3")->fetchAll();
@@ -322,8 +324,8 @@ $jsVer = file_exists(__DIR__ . '/assets/main.js') ? filemtime(__DIR__ . '/assets
       <span>./works</span>
     </a>
     <a class="dock-item" href="#skills">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect></svg>
-      <span>./keycaps</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+      <span>./skills</span>
     </a>
     <a class="dock-item" href="#blog">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
@@ -343,7 +345,7 @@ $jsVer = file_exists(__DIR__ . '/assets/main.js') ? filemtime(__DIR__ . '/assets
     <a class="mobile-link" href="#home">~/stage <span>→</span></a>
     <a class="mobile-link" href="#about">./about <span>→</span></a>
     <a class="mobile-link" href="#projects">./works <span>→</span></a>
-    <a class="mobile-link" href="#skills">./keycaps <span>→</span></a>
+    <a class="mobile-link" href="#skills">./skills <span>→</span></a>
     <a class="mobile-link" href="#blog">./logs <span>→</span></a>
     <a class="mobile-link" href="#contact">./transmit <span>→</span></a>
   </div>
@@ -760,74 +762,96 @@ $jsVer = file_exists(__DIR__ . '/assets/main.js') ? filemtime(__DIR__ . '/assets
   </section>
 
   <!-- ==========================================================================
-       SECTION 03: 3D TACTILE MECHANICAL KEYCAPS & RADIAL TELEMETRY
+       SECTION 03: TOOLS & TECHNOLOGIES YANG SAYA GUNAKAN (INTERACTIVE SHOWCASE)
        ========================================================================== -->
   <section class="section" id="skills">
     <div class="wrap">
-      <div class="section-header">
-        <div class="section-kicker">// 03_TACTILE_TECH_MATRIX</div>
-        <h2 class="section-title">3D Hardware Keycaps &amp; Stack</h2>
-        <p class="section-lead">Tekan atau arahkan kursor pada tombol mekanikal 3D di bawah untuk menguji telemetri penguasaan instrumen teknis.</p>
+      <!-- Top Split Editorial Header (Matches Reference) -->
+      <div class="skills-ref-header section-header">
+        <div class="skills-ref-heading-col">
+          <div class="section-kicker">// 03_TOOLS_&amp;_TECHNOLOGIES</div>
+          <h2 class="skills-ref-title">
+            <span>Tools &amp;</span>
+            <span class="skills-title-accent">technologies</span>
+            <span>Yang Saya Gunakan</span>
+          </h2>
+        </div>
+
+        <div class="skills-ref-summary-col">
+          <div class="skills-cat-counter">
+            <strong><?= str_pad((string)count($skillGroups), 2, '0', STR_PAD_LEFT) ?></strong>
+            <span>CATEGORIES</span>
+          </div>
+          <p class="skills-ref-lead"><?= e($skillsSubtitle) ?></p>
+        </div>
       </div>
 
-      <?php if (!$skills): ?>
+      <?php if (empty($skillGroups)): ?>
         <div class="empty">Data keahlian belum ditambahkan di database.</div>
       <?php else: ?>
-        <div class="skills-3d-layout">
-          <!-- Left: 3D Mechanical Keycaps Board -->
-          <div class="keycaps-board">
-            <?php foreach ($skills as $idx => $skill): ?>
-            <div class="keycap-card <?= $idx === 0 ? 'active-cap' : '' ?>"
-                 data-skill-name="<?= e($skill['name']) ?>"
-                 data-skill-cat="<?= e($skill['category'] ?: 'Core Stack') ?>"
-                 data-skill-level="<?= (int)$skill['level'] ?>">
-              <div class="keycap-top">
-                <div class="keycap-icon">
-                  <?= getSkillIcon($skill['name']) ?>
-                </div>
-                <span class="keycap-led"></span>
-              </div>
-              <div class="keycap-name"><?= e($skill['name']) ?></div>
-              <div class="keycap-cat"><?= e($skill['category'] ?: 'Core Stack') ?></div>
-              <div class="keycap-meter">
-                <div class="skill-bar-bg">
-                  <div class="skill-bar-fill" data-level="<?= (int)$skill['level'] ?>" style="width: 0%;"></div>
-                </div>
-                <span><?= (int)$skill['level'] ?>%</span>
-              </div>
+        <div class="skills-ref-board">
+          <!-- Left Column: Numbered Category Navigation -->
+          <div class="skills-cat-sidebar">
+            <div class="skills-cat-hint">Pilih Kategori -&gt;</div>
+            <div class="skills-cat-list" id="skills-cat-list" role="tablist" aria-label="Kategori Keahlian">
+              <?php foreach ($skillGroups as $gIdx => $group):
+                $numStr = str_pad((string)($gIdx + 1), 2, '0', STR_PAD_LEFT);
+                // Default active to index 0 (or Back End if user wants, let's make 01 active or click any)
+                $isActive = ($gIdx === 0);
+              ?>
+              <button type="button"
+                      class="skill-cat-item <?= $isActive ? 'active' : '' ?>"
+                      data-skill-cat-target="skill-focus-<?= $gIdx ?>"
+                      role="tab"
+                      aria-selected="<?= $isActive ? 'true' : 'false' ?>">
+                <span class="skill-cat-num"><?= $numStr ?></span>
+                <span class="skill-cat-icon"><?= get_skill_category_icon($group['icon'], $group['name']) ?></span>
+                <span class="skill-cat-label"><?= e($group['name']) ?></span>
+                <span class="skill-cat-arrow">↗</span>
+              </button>
+              <?php endforeach; ?>
             </div>
-            <?php endforeach; ?>
           </div>
 
-          <!-- Right: Live Radial Telemetry Gauge -->
-          <?php $firstSkill = $skills[0]; ?>
-          <div class="skill-telemetry-pod spotlight-card">
+          <!-- Right Column: Active Category Detail Stage -->
+          <div class="skills-focus-stage spotlight-card">
             <span class="tech-corner tl"></span><span class="tech-corner br"></span>
-            <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-sub);">
-              MODULE_TELEMETRY_READOUT
-            </div>
-
-            <div class="radial-gauge">
-              <svg viewBox="0 0 140 140">
-                <circle class="gauge-bg" cx="70" cy="70" r="60"></circle>
-                <circle class="gauge-fill" id="gauge-circle" cx="70" cy="70" r="60"></circle>
-              </svg>
-              <div class="gauge-center">
-                <span class="gauge-pct" id="gauge-pct"><?= (int)$firstSkill['level'] ?>%</span>
-                <span class="gauge-label">PROFICIENCY</span>
+            <?php foreach ($skillGroups as $gIdx => $group):
+              $numStr = str_pad((string)($gIdx + 1), 2, '0', STR_PAD_LEFT);
+              $isActive = ($gIdx === 0);
+              $itemCountStr = str_pad((string)count($group['items']), 2, '0', STR_PAD_LEFT);
+            ?>
+            <div class="skill-focus-panel <?= $isActive ? 'active' : '' ?>"
+                 id="skill-focus-<?= $gIdx ?>"
+                 role="tabpanel">
+              <div class="focus-panel-top">
+                <span class="focus-kicker">CURRENT FOCUS</span>
+                <span class="focus-index"><?= $numStr ?></span>
               </div>
-            </div>
 
-            <div>
-              <h3 id="gauge-title" style="font-family:var(--font-display); font-size:1.35rem;"><?= e($firstSkill['name']) ?></h3>
-              <p id="gauge-cat" style="font-family:var(--font-mono); font-size:0.76rem; color:var(--accent); margin-top:4px;">
-                LAYER // <?= e(strtoupper($firstSkill['category'] ?: 'CORE STACK')) ?>
-              </p>
-            </div>
+              <h3 class="focus-cat-title"><?= e($group['name']) ?></h3>
+              <p class="focus-cat-desc"><?= e($group['desc']) ?></p>
 
-            <p style="font-size:0.84rem; color:var(--text-muted);">
-              Klik salah satu tombol keycap 3D di sebelah kiri untuk menginspeksi metrik modul teknologi.
-            </p>
+              <?php if (empty($group['items'])): ?>
+                <div class="empty" style="padding:24px;">Belum ada item skill pada kategori ini.</div>
+              <?php else: ?>
+                <div class="focus-skills-grid">
+                  <?php foreach ($group['items'] as $sk): ?>
+                  <div class="focus-skill-box">
+                    <strong class="focus-skill-name"><?= e($sk['name']) ?></strong>
+                    <span class="focus-skill-sub"><?= e(!empty($sk['subtitle']) ? $sk['subtitle'] : 'Core Technology') ?></span>
+                  </div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+
+              <div class="focus-panel-footer">
+                <span><?= $itemCountStr ?> SKILLS</span>
+              </div>
+
+              <div class="focus-corner-arc" aria-hidden="true"></div>
+            </div>
+            <?php endforeach; ?>
           </div>
         </div>
       <?php endif; ?>
